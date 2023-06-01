@@ -7,7 +7,7 @@
 Author: Ivan Nguyen
 Last Updated: 05-24-2023
 Description: Cascade Delete
-Version: 1.2
+Version: 1.0.1
 '''
 from hec.script				import MessageBox, Constants
 from hec.dataTable			import HecDataTableToExcel
