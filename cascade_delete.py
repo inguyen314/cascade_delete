@@ -7,7 +7,7 @@
 Author: Ivan Nguyen
 Last Updated: 05-24-2023
 Description: Cascade Delete
-Version: 1.0.1
+Version: 1.3
 '''
 from hec.script				import MessageBox, Constants
 from hec.dataTable			import HecDataTableToExcel
@@ -353,8 +353,8 @@ print  'location_id_Selected = ' +  str(location_id_Selected)
 
 #=========================================================
 # select date option 2: hard coded in mysdate and myedate
-mysdate = '15Jan2000 1930'
-myedate = '31Dec2008 2400'
+mysdate = '01Jan2001 0000'
+myedate = '31Dec2005 2400'
 #=========================================================
 
 #sys.exit()
@@ -365,134 +365,138 @@ print 'myedate = ' + myedate
 #******************************************************			
 
 
-#******************************************************	
-# Open the CWMS database and set the timezone
-db = DBAPI.open()
-
-# Set Timezone = GMT, UsCentralTz = TimeZone.getTimeZone('US/Central'), Gmt6Tz = TimeZone.getTimeZone('GMT-06:00')
-db.setTimeZone('GMT')
-
-# Set time window with start and end date
-db.setTimeWindow(mysdate,myedate)
-db.setOfficeId('MVS')
-
-# override protected data
-db.setStoreRule('Replace All')
-db.setOverrideProtection(True)
-
-# NEW: cascade with remove protection. scott hoffman
-db.setTrimMissing(False)
-
-
-#=========================================================
-print '******************************************* TIER1'
-
-# Special Case: Cairo-Ohio is the only location that have 1Hour time internal
-if location_id_Selected in DataDict['TIER1']['Station']:
-	check_delete = 1
-
-	if location_id_Selected == 'Cairo-Ohio':
-		ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
-		StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
-	elif location_id_Selected == 'St Francis-St Francis':
-		ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
-		StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
-	elif location_id_Selected == 'Fisk-St Francis':
-		ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
-		StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
-	else:
-		try:	
-			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.30Minutes.0.lrgsShef-rev')
-			StageTSC = db.get (location_id_Selected + '.Stage.Inst.30Minutes.0.lrgsShef-rev')
-		except:
-			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.15Minutes.0.lrgsShef-rev')
-			StageTSC = db.get (location_id_Selected + '.Stage.Inst.15Minutes.0.lrgsShef-rev')
-				
-	#print  ElevTSC
-	#print StageTSC
+try:
+	#******************************************************	
+	# Open the CWMS database and set the timezone
+	db = DBAPI.open()
 	
-	print len(ElevTSC.values), " elev count"
-	print len(StageTSC.values), " stage count"
-
-	if check_delete == 1:
-		print 'check_delete==1 > Run DeleteFunction'
-		DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
-		print 'check_delete = ' +  str(check_delete)
-	print 'done'	
-
-print '******************************************* TIER2'
-
-if location_id_Selected in DataDict['TIER2']['Station']:
+	# Set Timezone = GMT, UsCentralTz = TimeZone.getTimeZone('US/Central'), Gmt6Tz = TimeZone.getTimeZone('GMT-06:00')
+	db.setTimeZone('GMT')
+	
+	# Set time window with start and end date
+	db.setTimeWindow(mysdate,myedate)
+	db.setOfficeId('MVS')
+	
+	# override protected data
+	db.setStoreRule('Replace All')
+	db.setOverrideProtection(True)
+	
+	# NEW: cascade with remove protection. scott hoffman
+	db.setTrimMissing(False)
+	
+	
+	#=========================================================
+	print '******************************************* TIER1'
+	
 	# Special Case: Cairo-Ohio is the only location that have 1Hour time internal
-	try:
+	if location_id_Selected in DataDict['TIER1']['Station']:
+		check_delete = 1
+	
 		if location_id_Selected == 'Cairo-Ohio':
 			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
+			StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
+		elif location_id_Selected == 'St Francis-St Francis':
+			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
+			StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
+		elif location_id_Selected == 'Fisk-St Francis':
+			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
+			StageTSC = db.get (location_id_Selected + '.Stage.Inst.1Hour.0.lrgsShef-rev')
 		else:
-			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.30Minutes.0.lrgsShef-rev')
-	except:
-		ElevTSC = db.get (location_id_Selected + '.Elev.Inst.15Minutes.0.lrgsShef-rev')
-			
-	for Param in DataDict['TIER2']['Parameters']:
-		print 'Param = ' + Param
-
-		# if check_delete = 0, no deletion
-		check_delete = 0
-		
-		if Param == 'StageRev':
-			check_delete_StageRev = 1
-
-			# setting up TS for StageTSC
-			try:
-				try:
-					StageTSC = db.get (location_id_Selected +   '.Stage.Inst.30Minutes.0.lrgsShef-rev')					
-				except:
-					StageTSC = db.get (location_id_Selected +  '.Stage.Inst.15Minutes.0.lrgsShef-rev')			
+			try:	
+				ElevTSC = db.get (location_id_Selected + '.Elev.Inst.30Minutes.0.lrgsShef-rev')
+				StageTSC = db.get (location_id_Selected + '.Stage.Inst.30Minutes.0.lrgsShef-rev')
 			except:
-				print 'StageRev data type not found = ' +  location_id_Selected +  '.Stage.Inst.30Minutes.0.lrgsShef-rev'
-				check_delete_StageRev = 0
-
-			# delete data
-			if check_delete_StageRev == 1:
-				print 'check_delete_StageRev==1 > Run DeleteFunction'
-				DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
-				print 'check_delete_StageRev = ' +  str(check_delete_StageRev)
-			print 'done'
-
-		# setting up TS for Stage29TSC	
-		elif Param == 'Stage29':
-			check_delete_Stage29 = 1
-			try:
-				try:
-					StageTSC = db.get (location_id_Selected + '.Stage.Inst.30Minutes.0.29')
-				except:
-					StageTSC = db.get (location_id_Selected +  '.Stage.Inst.15Minutes.0.29')
-			except:
-				print 'Stage29 data type not found = ' +  location_id_Selected +  '.Stage.Inst.30Minutes.0.29'
-				check_delete_Stage29 = 0
+				ElevTSC = db.get (location_id_Selected + '.Elev.Inst.15Minutes.0.lrgsShef-rev')
+				StageTSC = db.get (location_id_Selected + '.Stage.Inst.15Minutes.0.lrgsShef-rev')
+					
+		#print  ElevTSC
+		#print StageTSC
 		
-			if check_delete_Stage29 == 1:
-				print 'check_delete_Stage29==1 > Run DeleteFunction' 
-				DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
-				print 'check_delete_Stage29 = ' +  str(check_delete_Stage29)
-			print 'done'
-
+		print len(ElevTSC.values), " elev count"
+		print len(StageTSC.values), " stage count"
+	
+		if check_delete == 1:
+			print 'check_delete==1 > Run DeleteFunction'
+			DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
+			print 'check_delete = ' +  str(check_delete)
+		print 'done'	
+	
+	print '******************************************* TIER2'
+	
+	if location_id_Selected in DataDict['TIER2']['Station']:
+		# Special Case: Cairo-Ohio is the only location that have 1Hour time internal
+		try:
+			if location_id_Selected == 'Cairo-Ohio':
+				ElevTSC = db.get (location_id_Selected + '.Elev.Inst.1Hour.0.lrgsShef-rev')
+			else:
+				ElevTSC = db.get (location_id_Selected + '.Elev.Inst.30Minutes.0.lrgsShef-rev')
+		except:
+			ElevTSC = db.get (location_id_Selected + '.Elev.Inst.15Minutes.0.lrgsShef-rev')
+				
+		for Param in DataDict['TIER2']['Parameters']:
+			print 'Param = ' + Param
+	
+			# if check_delete = 0, no deletion
+			check_delete = 0
 			
-		print ElevTSC
-		print StageTSC
-
-
-#******************************************************	
-print '='
-print '='
-print '='
-print '=================================================================================='
-print '====================================== END CASCADE DELETE  LOG RUN ======================='
-print '================================================================================== '
-print '='
-print '='
-print '='
-
-db.close()
-
-MessageBox.showInformation('Completed', 'Alert')
+			if Param == 'StageRev':
+				check_delete_StageRev = 1
+	
+				# setting up TS for StageTSC
+				try:
+					try:
+						StageTSC = db.get (location_id_Selected +   '.Stage.Inst.30Minutes.0.lrgsShef-rev')					
+					except:
+						StageTSC = db.get (location_id_Selected +  '.Stage.Inst.15Minutes.0.lrgsShef-rev')			
+				except:
+					print 'StageRev data type not found = ' +  location_id_Selected +  '.Stage.Inst.30Minutes.0.lrgsShef-rev'
+					check_delete_StageRev = 0
+	
+				# delete data
+				if check_delete_StageRev == 1:
+					print 'check_delete_StageRev==1 > Run DeleteFunction'
+					DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
+					print 'check_delete_StageRev = ' +  str(check_delete_StageRev)
+				print 'done'
+	
+			# setting up TS for Stage29TSC	
+			elif Param == 'Stage29':
+				check_delete_Stage29 = 1
+				try:
+					try:
+						StageTSC = db.get (location_id_Selected + '.Stage.Inst.30Minutes.0.29')
+					except:
+						StageTSC = db.get (location_id_Selected +  '.Stage.Inst.15Minutes.0.29')
+				except:
+					print 'Stage29 data type not found = ' +  location_id_Selected +  '.Stage.Inst.30Minutes.0.29'
+					check_delete_Stage29 = 0
 			
+				if check_delete_Stage29 == 1:
+					print 'check_delete_Stage29==1 > Run DeleteFunction' 
+					DeleteFunction(ElevTSC, StageTSC, mysdate, myedate)
+					print 'check_delete_Stage29 = ' +  str(check_delete_Stage29)
+				print 'done'
+	
+				
+			print ElevTSC
+			print StageTSC
+	
+	
+	#******************************************************	
+	print '='
+	print '='
+	print '='
+	print '=================================================================================='
+	print '====================================== END CASCADE DELETE  LOG RUN ======================='
+	print '================================================================================== '
+	print '='
+	print '='
+	print '='
+	
+	MessageBox.showInformation('Completed', 'Alert')
+
+finally:
+	# Close the connection in the finally block
+    	if db:
+        	db.close()
+        	print("Oracle database connection closed")
