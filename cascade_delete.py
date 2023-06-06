@@ -1,8 +1,7 @@
-# name=Cascade Delete
+# name=cascade_delete
 # displayinmenu=true
 # displaytouser=true
 # displayinselector=true
-# backgroundColor=255,204,102,255
 '''
 Author: Ivan Nguyen
 Last Updated: 05-24-2023
@@ -154,7 +153,7 @@ DataDict =  {   'TIER1'     :   {   'Station'              :     ( 'Sand Ridge-B
 		                                                                    'Madison-Elk Fork Salt',
 		                                                                    'New London-Salt',
 		                                                                    'Norton Bridge-Salt',
-		                                                                    'Mark Twain Lk TW-Salt'
+		                                                                    'Mark Twain Lk TW-Salt',
 		                                                                    'Paris-Crooked Cr',
 		                                                                    'Perry-Lick Cr',
 		                                                                    'Santa Fe-S Fork Salt',
@@ -347,19 +346,26 @@ location_id_groupChoices = [  'Allenville-Whitley Cr','Alton-Mississippi','Arnol
 						
 location_id_Selected = JOptionPane.showInputDialog(None,"Choose a station to cascade delete","MVS_Deletor",JOptionPane.PLAIN_MESSAGE,None,location_id_groupChoices,location_id_groupChoices[0])
 
+#=========================================================
+# check which tier location selected
+if location_id_Selected in DataDict['TIER1']['Station']:
+	print "location_id_Selected is in TIER 1"
+	
+elif location_id_Selected in DataDict['TIER2']['Station']:
+	print "location_id_Selected is in TIER 2"
+	
+else:
+	print "location_id_Selected is NOT in either TIER 1 or TIER 2"
 
+	
 #=========================================================
 print  'location_id_Selected = ' +  str(location_id_Selected)
 
 #=========================================================
 # select date option 2: hard coded in mysdate and myedate
-mysdate = '01Jan2001 0000'
-myedate = '31Dec2005 2400'
-#=========================================================
+mysdate = '14Nov1983 1400'
+myedate = '01Jan1990 2400'
 
-#sys.exit()
-
-#******************************************************
 print 'mysdate = ' + mysdate
 print 'myedate = ' + myedate
 #******************************************************			
